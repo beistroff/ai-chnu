@@ -1,9 +1,11 @@
+""""This code implements all requirements of Lab 1"""
+
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from PIL import Image, ImageTk, ImageOps, ImageDraw
+from PIL import Image, ImageTk, ImageDraw
 import numpy as np
 
-
+"""Class for processing images. Note: Some functions may need to be moved out of this class."""
 class ImageProcessor:
     def __init__(self, root):
         self.root = root
@@ -13,24 +15,24 @@ class ImageProcessor:
         self.cropping = False
         self.start_x = None
         self.start_y = None
-        self.end_x = None  # New attribute to store end_x
-        self.end_y = None  # New attribute to store end_y
+        self.end_x = None
+        self.end_y = None
         self.rect = None
         self.cropped_image = None
+        self.image_for_vector_calculation = None
 
-        # Створюємо фрейм для картинки (зліва)
+        # Left frame for pictures
         self.left_frame = tk.Frame(root)
         self.left_frame.grid(column=0, row=0, rowspan=10, padx=10, pady=10)
 
-        # Створюємо фрейм для решти елементів (справа)
+        # Right frame for rest of components
         self.right_frame = tk.Frame(root)
         self.right_frame.grid(column=1, row=0, padx=10, pady=10)
 
-        # Додаємо елементи в лівий фрейм (картинка)
-        self.image_label = tk.Canvas(self.left_frame, width=300, height=300)  # Задаємо довільний розмір для початку
+        # Set initial size for the picture
+        self.image_label = tk.Canvas(self.left_frame, width=300, height=300) # Set initial size for picture
         self.image_label.pack()
 
-        # Додаємо елементи в правий фрейм
         self.upload_button = tk.Button(self.right_frame, text="Upload Image", command=self.upload_image)
         self.upload_button.grid(column=0, row=0)
 
@@ -58,13 +60,15 @@ class ImageProcessor:
         self.normalized_vector_label = tk.Label(self.right_frame, text="Normalized Vector (S1):")
         self.normalized_vector_label.grid(column=0, row=8)
 
-        self.normalized_vector_text_s1 = tk.Text(self.right_frame, height=2, width=50)  # Для нормалізації за сумою
+        # For normalization by module
+        self.normalized_vector_text_s1 = tk.Text(self.right_frame, height=2, width=50)
         self.normalized_vector_text_s1.grid(column=0, row=9)
 
         self.normalized_vector_label = tk.Label(self.right_frame, text="Normalized Vector For Module:")
         self.normalized_vector_label.grid(column=0, row=10)
 
-        self.normalized_vector_text_s2 = tk.Text(self.right_frame, height=2, width=50)  # Для нормалізації за модулем
+        # For normalization by modulus
+        self.normalized_vector_text_s2 = tk.Text(self.right_frame, height=2, width=50)
         self.normalized_vector_text_s2.grid(column=0, row=11)
 
         # Bind mouse events to image_label for cropping
@@ -97,10 +101,10 @@ class ImageProcessor:
         img = image.resize((new_width, new_height), Image.LANCZOS)
         img = ImageTk.PhotoImage(img)
 
-        # Оновлюємо розмір полотна відповідно до зображення
+        # Update size of the canvas based on picture
         self.image_label.config(width=new_width, height=new_height)
         self.image_label.create_image(0, 0, anchor=tk.NW, image=img)
-        self.image_label.image = img  # Зберігаємо посилання на зображення, щоб уникнути очищення пам'яті
+        self.image_label.image = img  # Save reference of pic in order to avoid memory cleaning
 
 
     def process_image(self):
@@ -143,7 +147,7 @@ class ImageProcessor:
 
         for i in range(sectors + 1):
             angle = np.radians(i * sector_angles)
-            
+
             line_end_x = center_x - int(np.cos(angle) * max(width, height) * 2)
             line_end_y = center_y - int(np.sin(angle) * max(width, height) * 2)
 
@@ -180,35 +184,35 @@ class ImageProcessor:
             sector_black_pixels = np.sum(np.logical_and(img_array == 0, sector_mask))
             feature_vector.append(sector_black_pixels)
 
-        # Очищуємо і виводимо інформацію про вектори
+        # Clean up and print output about vectors
         self.feature_vector_text.delete(1.0, tk.END)
         self.normalized_vector_text_s1.delete(1.0, tk.END)
         self.normalized_vector_text_s2.delete(1.0, tk.END)
 
-        # Форматування тексту
+        # Format text
         feature_vector_str = ', '.join([f's{i+1}: {count}' for i, count in enumerate(feature_vector)])
         self.feature_vector_text.insert(tk.END, f"[{feature_vector_str}]")
 
-        # Нормалізація
+        # Normalization for sum
         normalized_vector = [x / total_black_pixels if total_black_pixels > 0 else 0 for x in feature_vector]
         normalized_vector_str = ', '.join([f'(s{i+1}, {val:.4f})' for i, val in enumerate(normalized_vector)])
         self.normalized_vector_text_s1.insert(tk.END, f"[{normalized_vector_str}]")
 
-        # Нормалізація за модулем 
-        max_value = max(feature_vector) if feature_vector else 1  # Уникнути ділення на 0
+        # Normalization for module
+        max_value = max(feature_vector) if feature_vector else 1  # Avoid division by 0
         normalized_vector_s2 = [x / max_value if max_value > 0 else 0 for x in feature_vector]
         normalized_vector_str_s2 = ', '.join([f'(M{i + 1}, {val:.4f})' for i, val in enumerate(normalized_vector_s2)])
         self.normalized_vector_text_s2.insert(tk.END, f"[{normalized_vector_str_s2}]")
 
 
     def create_sector_mask(self, width, height, angle_start, angle_end):
-        # Створюємо маску для визначення сектору в зображенні
+        """Function to create a mask for defining a sector in the image."""
         Y, X = np.ogrid[:height, :width]
-        cx, cy = width, height  # Нижній правий кут
+        cx, cy = width, height  # Right bottom corner
         angles = np.degrees(np.arctan2(Y - cy, X - cx)) % 90
         mask = (angles >= angle_start) & (angles < angle_end)
         return mask
-    
+
 
     def on_crop_start(self, event):
         """Start cropping when the user clicks on the image."""
@@ -218,7 +222,13 @@ class ImageProcessor:
         if self.rect:
             self.image_label.delete(self.rect)  # Remove any previous selection
 
-        self.rect = self.image_label.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline='red')
+        self.rect = self.image_label.create_rectangle(
+            self.start_x, 
+            self.start_y, 
+            self.start_x, 
+            self.start_y, 
+            outline='red'
+        )
 
 
     def on_crop_drag(self, event):
@@ -237,12 +247,14 @@ class ImageProcessor:
             self.crop_image(self.start_x, self.start_y, self.end_x, self.end_y)
             self.cropping = False
 
+
     def crop_image(self, x1, y1, x2, y2):
+        """"Function for croping image"""
         if self.image is None:
             messagebox.showerror("Error", "No image uploaded")
             return
         
-        # Отримуємо розміри зображення
+        # Get size of image
         img_width, img_height = self.image.size
 
         x1 = max(0, min(x1, img_width))
