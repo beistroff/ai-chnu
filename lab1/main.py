@@ -205,15 +205,6 @@ class ImageProcessor:
         self.normalized_vector_text_s2.insert(tk.END, f"[{normalized_vector_str_s2}]")
 
 
-    def create_sector_mask(self, width, height, angle_start, angle_end):
-        """Function to create a mask for defining a sector in the image."""
-        Y, X = np.ogrid[:height, :width]
-        cx, cy = width, height  # Right bottom corner
-        angles = np.degrees(np.arctan2(Y - cy, X - cx)) % 90
-        mask = (angles >= angle_start) & (angles < angle_end)
-        return mask
-
-
     def on_crop_start(self, event):
         """Start cropping when the user clicks on the image."""
         self.cropping = True
