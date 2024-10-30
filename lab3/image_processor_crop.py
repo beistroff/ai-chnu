@@ -267,8 +267,8 @@ class ImageProcessor:
 
         # Очищуємо і виводимо відстані
         self.class_vector_text_distance.delete(1.0, tk.END)
-        manhattan_distance_str = ', '.join([f'd{i+1}: {d:.4f}' for i, d in enumerate(euclidian_distances)])
-        self.class_vector_text_distance.insert(tk.END, f"[{manhattan_distance_str}]")
+        euclidian_distances_str = ', '.join([f'd{i+1}: {d:.4f}' for i, d in enumerate(euclidian_distances)])
+        self.class_vector_text_distance.insert(tk.END, f"[{euclidian_distances_str}]")
 
         # Класифікація на основі відстаней (найменша відстань вказує на клас)
         classification_result = self.classify_image(euclidian_distances, class_vectors)
