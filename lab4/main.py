@@ -129,6 +129,7 @@ class DirectionDrawingApp:
         if self.directions1:
             self.class_vectors[class_num] = self.directions1.copy()
             self.similarity_label.config(text=f"Class {class_num} vector saved!")
+            print(f"Class {class_num} vector: {self.class_vectors[class_num]}")
         else:
             self.similarity_label.config(text="Draw a picture on Canvas 1 to save!")
 
@@ -137,8 +138,9 @@ class DirectionDrawingApp:
         if not all(self.class_vectors.values()):
             self.similarity_label.config(text="Please save a drawing for all classes!")
             return
+        
+        print(f"\nChecked image vector (Canvas 2): {self.directions2}")
 
-        self.pad_vectors()  # Ensure both vectors have the same length
         similarities = {class_num: calculate_similarity(self.directions2, class_vector)
                         for class_num, class_vector in self.class_vectors.items()}
 
@@ -146,13 +148,6 @@ class DirectionDrawingApp:
         similarity_text = "\n".join(f"Class {class_num} Similarity: {similarity:.2f}%"
                                     for class_num, similarity in similarities.items())
         self.similarity_label.config(text=similarity_text)
-
-    # Pad vectors to be the same length
-    def pad_vectors(self):
-        max_length = max(len(self.directions2), max(len(v) for v in self.class_vectors.values()))
-        self.directions2.extend([0] * (max_length - len(self.directions2)))
-        for class_num in self.class_vectors:
-            self.class_vectors[class_num].extend([0] * (max_length - len(self.class_vectors[class_num])))
 
 # Run the application
 root = tk.Tk()
