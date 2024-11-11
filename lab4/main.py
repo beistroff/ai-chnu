@@ -49,11 +49,11 @@ class DirectionDrawingApp:
         self.canvas2.bind("<B1-Motion>", self.draw2)
 
         # Text widgets to display vectors
-        self.vector1_text = tk.Text(root, height=8, width=40, font=("Arial", 10), wrap="none")
-        self.vector1_text.grid(row=2, column=0, padx=10, pady=5)
+        # self.vector1_text = tk.Text(root, height=8, width=40, font=("Arial", 10), wrap="none")
+        # self.vector1_text.grid(row=2, column=0, padx=10, pady=5)
 
-        self.vector2_text = tk.Text(root, height=8, width=40, font=("Arial", 10), wrap="none")
-        self.vector2_text.grid(row=2, column=1, padx=10, pady=5)
+        # self.vector2_text = tk.Text(root, height=8, width=40, font=("Arial", 10), wrap="none")
+        # self.vector2_text.grid(row=2, column=1, padx=10, pady=5)
 
         self.class_buttons = []
         colors = ["lightgreen", "lightblue", "orange"]
